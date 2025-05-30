@@ -61,7 +61,7 @@ resource "circleci_checkout_key" "deploy_key" {
 resource "circleci_webhook" "build_notifications" {
   name   = "Build Notifications"
   url    = "https://your-app.com/webhooks/circleci"
-  events = ["workflow-completed", "job-completed"]
+  events = ["workflow-completed"]
   
   scope = {
     id   = circleci_project.example.id

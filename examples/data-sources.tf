@@ -22,123 +22,73 @@ variable "project_slug" {
   type        = string
 }
 
-variable "workflow_id" {
-  description = "Workflow ID to analyze"
+variable "organization_id" {
+  description = "Organization ID"
   type        = string
 }
 
-variable "job_number" {
-  description = "Job number to analyze"
-  type        = number
+# Get project information
+data "circleci_project" "example" {
+  slug = var.project_slug
 }
 
-# Get artifacts from a specific job
-data "circleci_artifacts" "build_artifacts" {
+# Get organization information
+data "circleci_organization" "main" {
+  id = var.organization_id
+}
+
+# Get organization policies
+data "circleci_policies" "org_policies" {
+  org_id = data.circleci_organization.main.id
+}
+
+# Get insights for the project
+data "circleci_insight" "project_metrics" {
   project_slug = var.project_slug
-  job_number   = var.job_number
-  
-  filter = {
-    path_pattern = "*.jar"  # Only get JAR files
-    node_index   = 0        # From first node
-  }
+  workflow     = "main"
+  branch       = "main"
 }
 
-# Get test results from a job
-data "circleci_tests" "test_results" {
-  project_slug = var.project_slug
-  job_number   = var.job_number
-  
-  filter = {
-    result = "failure"  # Only failed tests
-  }
-}
-
-# Get all jobs in a workflow
-data "circleci_jobs" "workflow_jobs" {
-  workflow_id = var.workflow_id
-}
-
-# Get only failed jobs from the workflow
-data "circleci_jobs" "failed_jobs" {
-  workflow_id = var.workflow_id
-  
-  filter = {
-    status = "failed"
-  }
-}
-
-# Get approval jobs from the workflow
-data "circleci_jobs" "approval_jobs" {
-  workflow_id = var.workflow_id
-  
-  filter = {
-    type = "approval"
+# Get context information
+data "circleci_context" "shared" {
+  name = "shared-context"
+  owner = {
+    id   = data.circleci_organization.main.id
+    slug = data.circleci_organization.main.slug
+    type = "organization"
   }
 }
 
 # Outputs for analysis
-output "artifact_count" {
-  description = "Number of JAR artifacts found"
-  value       = length(data.circleci_artifacts.build_artifacts.artifacts)
-}
-
-output "artifact_urls" {
-  description = "URLs of all JAR artifacts"
-  value       = [for artifact in data.circleci_artifacts.build_artifacts.artifacts : artifact.url]
-}
-
-output "failed_test_count" {
-  description = "Number of failed tests"
-  value       = length(data.circleci_tests.test_results.tests)
-}
-
-output "failed_test_names" {
-  description = "Names of failed tests"
-  value       = [for test in data.circleci_tests.test_results.tests : test.name]
-}
-
-output "total_test_time" {
-  description = "Total execution time of failed tests (seconds)"
-  value = sum([
-    for test in data.circleci_tests.test_results.tests : test.run_time_seconds
-  ])
-}
-
-output "workflow_job_statuses" {
-  description = "Status of all jobs in the workflow"
+output "project_info" {
+  description = "Project information"
   value = {
-    for job in data.circleci_jobs.workflow_jobs.jobs : job.name => job.status
+    name         = data.circleci_project.example.name
+    organization = data.circleci_project.example.organization
+    vcs_url      = data.circleci_project.example.vcs_url
+    vcs_type     = data.circleci_project.example.vcs_type
   }
 }
 
-output "failed_job_names" {
-  description = "Names of failed jobs"
-  value = [for job in data.circleci_jobs.failed_jobs.jobs : job.name]
-}
-
-output "pending_approvals" {
-  description = "Jobs waiting for approval"
-  value = [
-    for job in data.circleci_jobs.approval_jobs.jobs : {
-      name      = job.name
-      job_number = job.job_number
-      approval_request_id = job.approval_request_id
-    }
-    if job.status == "on_hold"
-  ]
-}
-
-# Example of creating a summary report
-locals {
-  workflow_summary = {
-    total_jobs        = length(data.circleci_jobs.workflow_jobs.jobs)
-    failed_jobs       = length(data.circleci_jobs.failed_jobs.jobs)
-    pending_approvals = length([for job in data.circleci_jobs.approval_jobs.jobs : job if job.status == "on_hold"])
-    success_rate      = (length(data.circleci_jobs.workflow_jobs.jobs) - length(data.circleci_jobs.failed_jobs.jobs)) / length(data.circleci_jobs.workflow_jobs.jobs) * 100
+output "organization_info" {
+  description = "Organization information"
+  value = {
+    name = data.circleci_organization.main.name
+    slug = data.circleci_organization.main.slug
   }
 }
 
-output "workflow_summary" {
-  description = "Summary of workflow execution"
-  value = local.workflow_summary
+output "policy_count" {
+  description = "Number of policies in organization"
+  value       = length(data.circleci_policies.org_policies.policies)
+}
+
+output "project_metrics" {
+  description = "Project performance metrics"
+  value = {
+    success_rate    = data.circleci_insight.project_metrics.metrics.success_rate
+    mean_duration   = data.circleci_insight.project_metrics.metrics.mean_duration_sec
+    total_runs      = data.circleci_insight.project_metrics.metrics.total_runs
+    throughput      = data.circleci_insight.project_metrics.metrics.throughput
+  }
 }

@@ -166,20 +166,17 @@ go test ./... -v
 
 ## CircleCI API Resources Covered
 
-### Current Resources (14)
+### Current Resources (11)
 - Contexts and Environment Variables
 - Projects and Checkout Keys
 - Webhooks and Schedules
-- Pipelines and Jobs
 - OIDC Tokens and Policies
-- Users and Usage Exports
-- **Runners and Runner Tokens** (New)
+- Usage Exports
+- Runners and Runner Tokens
 
-### Current Data Sources (10)
+### Current Data Sources (5)
 - Context, Project, Insights
-- Organization, Workflow, Workflows
-- Policies
-- **Artifacts, Tests, Jobs** (New)
+- Organization, Policies
 
 ## Getting Help
 

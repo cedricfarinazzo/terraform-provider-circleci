@@ -123,11 +123,8 @@ func (p *CircleCIProvider) Resources(ctx context.Context) []func() resource.Reso
 		NewCheckoutKeyResource,
 		NewWebhookResource,
 		NewScheduleResource,
-		NewPipelineResource,
 		NewOIDCTokenResource,
-		NewJobResource,
 		NewPolicyResource,
-		NewUserResource,
 		NewUsageExportResource,
 		NewRunnerResource,
 		NewRunnerTokenResource,
@@ -140,12 +137,7 @@ func (p *CircleCIProvider) DataSources(ctx context.Context) []func() datasource.
 		NewProjectDataSource,
 		NewInsightDataSource,
 		NewOrganizationDataSource,
-		NewWorkflowDataSource,
-		NewWorkflowsDataSource,
 		NewPoliciesDataSource,
-		NewArtifactsDataSource,
-		NewTestsDataSource,
-		NewJobsDataSource,
 	}
 }
 

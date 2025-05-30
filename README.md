@@ -13,11 +13,8 @@ This provider supports managing the following CircleCI resources:
 - **Checkout Keys** - Manage SSH keys for repository access
 - **Webhooks** - Configure webhooks for build notifications
 - **Schedules** - Create and manage scheduled pipeline runs
-- **Pipelines** - Trigger and manage CircleCI pipelines
 - **OIDC Tokens** - Manage OpenID Connect authentication tokens
-- **Jobs** - Interact with jobs (cancel, approve, rerun operations)
 - **Policies** - Manage organization policies for compliance and governance
-- **Users** - Manage team members and their roles within organizations
 - **Usage Exports** - Export organization usage data for analysis
 - **Runners** - Manage self-hosted runners for custom execution environments
 - **Runner Tokens** - Manage authentication tokens for self-hosted runners
@@ -27,12 +24,7 @@ This provider supports managing the following CircleCI resources:
 - **Project** - Get information about existing projects
 - **Insights** - Retrieve workflow metrics and performance data
 - **Organization** - Get information about organizations
-- **Workflow** - Get information about a specific workflow
-- **Workflows** - List workflows within a pipeline
 - **Policies** - List all policies in an organization
-- **Artifacts** - Retrieve job artifacts with download URLs and metadata
-- **Tests** - Retrieve test results with execution times and status information
-- **Jobs** - List jobs within workflows with status and approval information
 
 ## Requirements
 
@@ -119,7 +111,7 @@ resource "circleci_checkout_key" "deploy_key" {
 resource "circleci_webhook" "notifications" {
   name   = "Build Notifications"
   url    = "https://your-app.com/webhooks/circleci"
-  events = ["workflow-completed", "job-completed"]
+  events = ["workflow-completed"]
   
   scope = {
     id   = circleci_project.example.id
@@ -163,10 +155,6 @@ output "success_rate" {
   value = data.circleci_insight.metrics.metrics.success_rate
 }
 
-data "circleci_workflows" "pipeline_workflows" {
-  pipeline_id = "5034460f-c7c4-4c43-9457-de07e2029e7b"
-}
-
 data "circleci_policies" "org_policies" {
   org_id = "bb604b45-b6b0-4b81-ad80-796f15eddf87"
 }
@@ -184,26 +172,11 @@ resource "circleci_policy" "security_policy" {
   content     = file("${path.module}/policies/security.rego")
 }
 
-# User Management
-resource "circleci_user" "developer" {
-  email  = "developer@example.com"
-  org_id = "bb604b45-b6b0-4b81-ad80-796f15eddf87"
-  role   = "member"
-}
-
 # Usage Exports
 resource "circleci_usage_export" "monthly_report" {
   org_id = "bb604b45-b6b0-4b81-ad80-796f15eddf87"
   start  = "2024-01-01T00:00:00Z"
   end    = "2024-01-31T23:59:59Z"
-}
-
-# Job Management
-resource "circleci_job" "approve_deployment" {
-  project_slug = "gh/your-org/your-repo"
-  job_number   = 789
-  action       = "approve"
-  approval_id  = "approval-request-id"
 }
 
 # Self-hosted Runner Management
@@ -216,35 +189,6 @@ resource "circleci_runner" "build_runner" {
 resource "circleci_runner_token" "runner_auth" {
   resource_class = "my-org/my-runner-class"
   nickname       = "build-runner-token"
-}
-
-# Retrieve Job Artifacts
-data "circleci_artifacts" "build_artifacts" {
-  project_slug = "gh/your-org/your-repo"
-  job_number   = 123
-}
-
-output "artifact_urls" {
-  value = data.circleci_artifacts.build_artifacts.artifacts[*].url
-}
-
-# Get Test Results
-data "circleci_tests" "test_results" {
-  project_slug = "gh/your-org/your-repo"
-  job_number   = 123
-}
-
-output "failed_tests" {
-  value = [for test in data.circleci_tests.test_results.tests : test.name if test.result == "failure"]
-}
-
-# List Workflow Jobs
-data "circleci_jobs" "workflow_jobs" {
-  workflow_id = "5034460f-c7c4-4c43-9457-de07e2029e7b"
-}
-
-output "job_statuses" {
-  value = {for job in data.circleci_jobs.workflow_jobs.jobs : job.name => job.status}
 }
 ```
 

@@ -56,7 +56,7 @@ resource "circleci_checkout_key" "deploy_key" {
 resource "circleci_webhook" "slack_notifications" {
   name   = "Slack Build Notifications"
   url    = var.slack_webhook_url
-  events = ["workflow-completed", "job-completed"]
+  events = ["workflow-completed"]
   
   scope = {
     id   = circleci_project.main_app.id
@@ -119,21 +119,6 @@ deny contains msg if {
 EOT
 }
 
-# Team member management
-resource "circleci_user" "developers" {
-  for_each = toset(var.developer_emails)
-  
-  email  = each.value
-  org_id = data.circleci_organization.main.id
-  role   = "member"
-}
-
-resource "circleci_user" "admin" {
-  email  = var.admin_email
-  org_id = data.circleci_organization.main.id
-  role   = "admin"
-}
-
 # Monthly usage export
 resource "circleci_usage_export" "monthly" {
   org_id = data.circleci_organization.main.id
@@ -167,17 +152,6 @@ variable "webhook_secret" {
 
 variable "user_id" {
   description = "User ID for schedule attribution"
-  type        = string
-}
-
-variable "developer_emails" {
-  description = "List of developer email addresses"
-  type        = list(string)
-  default     = []
-}
-
-variable "admin_email" {
-  description = "Admin user email address"
   type        = string
 }
 

@@ -126,7 +126,7 @@ resource "circleci_checkout_key" "deploy_key" {
 resource "circleci_webhook" "deployment_notifications" {
   name   = "Deployment Notifications"
   url    = "https://hooks.slack.com/your-webhook-url"
-  events = ["workflow-completed", "job-completed"]
+  events = ["workflow-completed"]
   
   scope = {
     id   = circleci_project.main.id
@@ -173,47 +173,6 @@ data "circleci_insight" "project_metrics" {
   branch       = "main"
 }
 
-# Example workflow analysis (you would get this from actual workflow runs)
-locals {
-  # Example workflow ID - in practice this would come from pipeline data
-  example_workflow_id = "5034460f-c7c4-4c43-9457-de07e2029e7b"
-  example_job_number  = 123
-}
-
-# Analyze workflow jobs
-data "circleci_jobs" "workflow_analysis" {
-  workflow_id = local.example_workflow_id
-}
-
-# Get failed jobs specifically
-data "circleci_jobs" "failed_jobs" {
-  workflow_id = local.example_workflow_id
-  
-  filter = {
-    status = "failed"
-  }
-}
-
-# Get test results from a failed job
-data "circleci_tests" "failed_tests" {
-  project_slug = var.project_slug
-  job_number   = local.example_job_number
-  
-  filter = {
-    result = "failure"
-  }
-}
-
-# Get artifacts from build jobs
-data "circleci_artifacts" "build_artifacts" {
-  project_slug = var.project_slug
-  job_number   = local.example_job_number
-  
-  filter = {
-    path_pattern = "*.{jar,war,tar.gz}"
-  }
-}
-
 # =============================================================================
 # OUTPUTS FOR MONITORING AND AUTOMATION
 # =============================================================================
@@ -247,28 +206,6 @@ output "project_metrics" {
     mean_duration    = data.circleci_insight.project_metrics.metrics.mean_duration_sec
     total_runs       = data.circleci_insight.project_metrics.metrics.total_runs
     throughput       = data.circleci_insight.project_metrics.metrics.throughput
-  }
-}
-
-output "workflow_health" {
-  description = "Current workflow health status"
-  value = {
-    total_jobs     = length(data.circleci_jobs.workflow_analysis.jobs)
-    failed_jobs    = length(data.circleci_jobs.failed_jobs.jobs)
-    failed_tests   = length(data.circleci_tests.failed_tests.tests)
-    artifacts      = length(data.circleci_artifacts.build_artifacts.artifacts)
-    health_score   = (length(data.circleci_jobs.workflow_analysis.jobs) - length(data.circleci_jobs.failed_jobs.jobs)) / length(data.circleci_jobs.workflow_analysis.jobs) * 100
-  }
-}
-
-output "automation_urls" {
-  description = "URLs for build artifacts and reports"
-  value = {
-    artifacts = [for artifact in data.circleci_artifacts.build_artifacts.artifacts : {
-      name = artifact.path
-      url  = artifact.url
-      size = artifact.pretty_size
-    }]
   }
 }
 
