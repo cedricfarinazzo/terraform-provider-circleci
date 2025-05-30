@@ -6,51 +6,77 @@
   "automerge": true,
   "automergeType": "pr",
   "automergeStrategy": "merge",
-  "reviewers": ["@github/copilot"],
+  "reviewers": [
+    "@github/copilot"
+  ],
   "platformAutomerge": true,
   "semanticCommits": "enabled",
   "semanticCommitType": "chore",
   "semanticCommitScope": "deps",
   "prCreation": "immediate",
   "rebaseWhen": "conflicted",
-  "labels": ["dependencies"],
+  "labels": [
+    "dependencies"
+  ],
   "assignAutomerge": true,
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "Dependency Dashboard",
-  "schedule": ["at any time"],
+  "schedule": [
+    "at any time"
+  ],
   "timezone": "UTC",
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "automerge": true
     },
     {
-      "matchUpdateTypes": ["major"],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "automerge": false,
-      "reviewers": ["@github/copilot"]
+      "reviewers": [
+        "@github/copilot"
+      ]
     },
     {
-      "matchDepTypes": ["devDependencies"],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
       "automerge": true,
-      "labels": ["dependencies", "dev-dependencies"]
+      "labels": [
+        "dependencies",
+        "dev-dependencies"
+      ]
     },
     {
-      "matchPackagePatterns": ["^go"],
       "groupName": "Go dependencies",
       "automerge": true,
       "semanticCommitType": "chore",
-      "semanticCommitScope": "go-deps"
+      "semanticCommitScope": "go-deps",
+      "matchPackageNames": [
+        "/^go/"
+      ]
     }
   ],
-  "postUpdateOptions": ["gomodTidy"],
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
   "vulnerabilityAlerts": {
     "enabled": true,
     "automerge": true,
-    "labels": ["security"]
+    "labels": [
+      "security"
+    ]
   },
   "lockFileMaintenance": {
     "enabled": true,
     "automerge": true,
-    "schedule": ["before 4am on monday"]
+    "schedule": [
+      "before 4am on monday"
+    ]
   }
 }
