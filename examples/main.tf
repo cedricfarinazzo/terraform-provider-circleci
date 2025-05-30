@@ -1,8 +1,8 @@
 terraform {
   required_providers {
     circleci = {
-      source = "your-org/circleci"
-      version = "~> 1.0"
+      source = "cedric-farinazzo/circleci"
+      version = "~> 0.1.2"
     }
   }
 }
