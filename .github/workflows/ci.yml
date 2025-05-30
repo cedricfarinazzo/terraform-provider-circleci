@@ -3,6 +3,8 @@ name: CI
 on:
   push:
     branches: [ master ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ master ]
 
@@ -12,15 +14,15 @@ jobs:
     strategy:
       matrix:
         go-version: ['1.21', '1.22', '1.23']
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: ${{ matrix.go-version }}
-    
+
     - name: Cache Go modules
       uses: actions/cache@v3
       with:
@@ -28,13 +30,13 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
-    
+
     - name: Download dependencies
       run: go mod download
-    
+
     - name: Run tests
       run: go test ./...
-    
+
     - name: Run go fmt
       run: |
         if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
@@ -42,10 +44,10 @@ jobs:
           gofmt -s -l .
           exit 1
         fi
-    
+
     - name: Run go vet
       run: go vet ./...
-    
+
     - name: Build
       run: go build -o terraform-provider-circleci
 
@@ -53,18 +55,18 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: test
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: '1.23'
-    
+
     - name: Download dependencies
       run: go mod download
-    
+
     - name: Run acceptance tests
       env:
         TF_ACC: "1"
@@ -72,31 +74,38 @@ jobs:
       run: go test ./... -v -timeout 120m
       if: env.CIRCLECI_TOKEN != ''
 
-  build-release:
+  release:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     needs: test
-    
+    permissions:
+      contents: write
+
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Set up Go
-      uses: actions/setup-go@v4
       with:
-        go-version: '1.23'
-    
-    - name: Build for multiple platforms
-      run: |
-        mkdir -p dist
-        GOOS=linux GOARCH=amd64 go build -o dist/terraform-provider-circleci_linux_amd64
-        GOOS=linux GOARCH=arm64 go build -o dist/terraform-provider-circleci_linux_arm64
-        GOOS=darwin GOARCH=amd64 go build -o dist/terraform-provider-circleci_darwin_amd64
-        GOOS=darwin GOARCH=arm64 go build -o dist/terraform-provider-circleci_darwin_arm64
-        GOOS=windows GOARCH=amd64 go build -o dist/terraform-provider-circleci_windows_amd64.exe
-    
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
+        # Allow goreleaser to access older tag information.
+        fetch-depth: 0
+
+    - uses: actions/setup-go@v5
       with:
-        files: dist/*
+        go-version-file: 'go.mod'
+        cache: true
+
+    - name: Import GPG key
+      uses: crazy-max/ghaction-import-gpg@v6
+      id: import_gpg
+      with:
+        gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.PASSPHRASE }}
+
+    - name: Run GoReleaser
+      uses: goreleaser/goreleaser-action@v6
+      with:
+        distribution: goreleaser
+        version: latest
+        args: release --clean
       env:
+        # GitHub sets the GITHUB_TOKEN secret automatically.
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
