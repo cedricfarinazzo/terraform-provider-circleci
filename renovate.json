@@ -8,6 +8,17 @@
   "automergeStrategy": "merge",
   "reviewers": ["@github/copilot"],
   "platformAutomerge": true,
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps",
+  "prCreation": "immediate",
+  "rebaseWhen": "conflicted",
+  "labels": ["dependencies"],
+  "assignAutomerge": true,
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Dependency Dashboard",
+  "schedule": ["at any time"],
+  "timezone": "UTC",
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch"],
@@ -17,6 +28,29 @@
       "matchUpdateTypes": ["major"],
       "automerge": false,
       "reviewers": ["@github/copilot"]
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "automerge": true,
+      "labels": ["dependencies", "dev-dependencies"]
+    },
+    {
+      "matchPackagePatterns": ["^go"],
+      "groupName": "Go dependencies",
+      "automerge": true,
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "go-deps"
     }
-  ]
+  ],
+  "postUpdateOptions": ["gomodTidy"],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "automerge": true,
+    "labels": ["security"]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "schedule": ["before 4am on monday"]
+  }
 }
