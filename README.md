@@ -78,7 +78,7 @@ This provider supports managing the following CircleCI resources:
 terraform {
   required_providers {
     circleci = {
-      source  = "your-org/circleci"
+      source  = "cedricfarinazzo/circleci"
       version = "~> 1.0"
     }
   }
@@ -118,7 +118,7 @@ Here's a minimal example to get you started:
 terraform {
   required_providers {
     circleci = {
-      source  = "your-org/circleci"
+      source  = "cedricfarinazzo/circleci"
       version = "~> 1.0"
     }
   }
@@ -307,7 +307,7 @@ go test ./... -v
    ```terraform
    provider_installation {
      dev_overrides {
-       "your-org/circleci" = "/path/to/terraform-provider-circleci"
+       "cedricfarinazzo/circleci" = "/path/to/terraform-provider-circleci"
      }
      direct {}
    }
@@ -318,7 +318,7 @@ go test ./... -v
    terraform {
      required_providers {
        circleci = {
-         source = "your-org/circleci"
+         source = "cedricfarinazzo/circleci"
        }
      }
    }
@@ -326,7 +326,7 @@ go test ./... -v
 
 ## 📖 Documentation
 
-Full documentation for all resources and data sources is available in the [docs](./docs) directory or on the [Terraform Registry](https://registry.terraform.io/providers/your-org/circleci/latest/docs).
+Full documentation for all resources and data sources is available in the [docs](./docs) directory or on the [Terraform Registry](https://registry.terraform.io/providers/cedricfarinazzo/circleci/latest/docs).
 
 ## 🤝 Contributing
 
@@ -342,7 +342,7 @@ This project is licensed under the Mozilla Public License 2.0 - see the [LICENSE
 
 ## 🆘 Support
 
-- **📖 Documentation**: [Terraform Registry](https://registry.terraform.io/providers/your-org/circleci/latest/docs)
+- **📖 Documentation**: [Terraform Registry](https://registry.terraform.io/providers/cedricfarinazzo/circleci/latest/docs)
 - **🐛 Issues**: [GitHub Issues](https://github.com/cedricfarinazzo/terraform-provider-circleci/issues)
 - **🔗 CircleCI API Documentation**: [CircleCI API v2](https://circleci.com/docs/api/v2/index.html)
 
