@@ -2,7 +2,7 @@ module github.com/cedricfarinazzo/terraform-provider-circleci
 
 go 1.24.0
 
-toolchain go1.26.1
+toolchain go1.26.2
 
 require (
 	github.com/hashicorp/terraform-plugin-framework v1.18.0
